@@ -57,6 +57,7 @@
 #  include <windows.h>
 # else
 #  include <sys/mman.h>
+#  include <sys/resource.h>
 #  include <sys/wait.h>
 # endif  // GTEST_OS_WINDOWS
 
@@ -1244,6 +1245,11 @@ inline char** GetEnviron() { return environ; }
 // This function is called in a clone()-ed process and thus must avoid
 // any potentially unsafe operations like malloc or libc functions.
 static int ExecDeathTestChildMain(void* child_arg) {
+  rlimit core_limit;
+  core_limit.rlim_cur = 0;
+  core_limit.rlim_max = 0;
+  setrlimit(RLIMIT_CORE, &core_limit);
+
   ExecDeathTestArgs* const args = static_cast<ExecDeathTestArgs*>(child_arg);
   GTEST_DEATH_TEST_CHECK_SYSCALL_(close(args->close_fd));
 
