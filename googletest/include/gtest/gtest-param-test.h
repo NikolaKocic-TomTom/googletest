@@ -416,6 +416,11 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       : public test_suite_name {                                               \
    public:                                                                     \
     GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() {}                    \
+    ~GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)() = default;           \
+    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
+                                                           test_name));        \
+    GTEST_DISALLOW_MOVE_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
+                                                           test_name));        \
     virtual void TestBody();                                                   \
                                                                                \
    private:                                                                    \
@@ -432,8 +437,6 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       return 0;                                                                \
     }                                                                          \
     static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
-    GTEST_DISALLOW_COPY_AND_ASSIGN_(GTEST_TEST_CLASS_NAME_(test_suite_name,    \
-                                                           test_name));        \
   };                                                                           \
   int GTEST_TEST_CLASS_NAME_(test_suite_name,                                  \
                              test_name)::gtest_registering_dummy_ =            \
