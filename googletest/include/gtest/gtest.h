@@ -760,6 +760,10 @@ class GTEST_API_ TestInfo {
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
+  void setTags(const std::string& tags) { tags_ = tags; }
+
+  const std::string& tags() const { return tags_; }
+
  private:
 #if GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -773,7 +777,7 @@ class GTEST_API_ TestInfo {
       const char* value_param, internal::CodeLocation code_location,
       internal::TypeId fixture_class_id, internal::SetUpTestSuiteFunc set_up_tc,
       internal::TearDownTestSuiteFunc tear_down_tc,
-      internal::TestFactoryBase* factory);
+      internal::TestFactoryBase* factory, const char* tags);
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
@@ -820,6 +824,8 @@ class GTEST_API_ TestInfo {
   // This field is mutable and needs to be reset before running the
   // test for the second time.
   TestResult result_;
+
+  std::string tags_;
 
   GTEST_DISALLOW_COPY_AND_ASSIGN_(TestInfo);
 };
@@ -2328,14 +2334,15 @@ constexpr bool StaticAssertTypeEq() noexcept {
 // code.  GetTestTypeId() is guaranteed to always return the same
 // value, as it always calls GetTypeId<>() from the Google Test
 // framework.
-#define GTEST_TEST(test_suite_name, test_name)             \
+#define GTEST_TEST(test_suite_name, test_name, tags)       \
   GTEST_TEST_(test_suite_name, test_name, ::testing::Test, \
-              ::testing::internal::GetTestTypeId())
+              ::testing::internal::GetTestTypeId(), tags)
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
 #if !GTEST_DONT_DEFINE_TEST
-#define TEST(test_suite_name, test_name) GTEST_TEST(test_suite_name, test_name)
+#define TAGGED_TEST(test_suite_name, test_name, tags) GTEST_TEST(test_suite_name, test_name, tags)
+#define TEST(test_suite_name, test_name) TAGGED_TEST(test_suite_name, test_name, )
 #endif
 
 // Defines a test that uses a test fixture.
@@ -2365,9 +2372,12 @@ constexpr bool StaticAssertTypeEq() noexcept {
 //   }
 //
 // GOOGLETEST_CM0011 DO NOT DELETE
-#define TEST_F(test_fixture, test_name)\
+
+#define TAGGED_TEST_F(test_fixture, test_name, tags)\
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
-              ::testing::internal::GetTypeId<test_fixture>())
+              ::testing::internal::GetTypeId<test_fixture>(), tags)
+
+#define TEST_F(test_fixture, test_name) TAGGED_TEST_F(test_fixture, test_name, )
 
 // Returns a path to temporary directory.
 // Tries to determine an appropriate directory for the platform.

@@ -2582,11 +2582,12 @@ TestInfo* MakeAndRegisterTestInfo(
     const char* test_suite_name, const char* name, const char* type_param,
     const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
-    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory) {
+    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory, const char* tags) {
   TestInfo* const test_info =
       new TestInfo(test_suite_name, name, type_param, value_param,
                    code_location, fixture_class_id, factory);
   GetUnitTestImpl()->AddTestInfo(set_up_tc, tear_down_tc, test_info);
+  test_info->setTags(tags);
   return test_info;
 }
 

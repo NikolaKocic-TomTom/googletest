@@ -60,14 +60,14 @@ class FooTest : public ::testing::TestWithParam<const char*> {
 // for this fixture as you want. The _P suffix is for "parameterized"
 // or "pattern", whichever you prefer to think.
 
-TEST_P(FooTest, DoesBlah) {
+TAGGED_TEST_P(FooTest, DoesBlah, tags) {
   // Inside a test, access the test parameter with the GetParam() method
   // of the TestWithParam<T> class:
   EXPECT_TRUE(foo.Blah(GetParam()));
   ...
 }
 
-TEST_P(FooTest, HasBlahBlah) {
+TAGGED_TEST_P(FooTest, HasBlahBlah, tags) {
   ...
 }
 
@@ -411,7 +411,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
   return internal::CartesianProductHolder<Generator...>(g...);
 }
 
-#define TEST_P(test_suite_name, test_name)                                     \
+#define TAGGED_TEST_P(test_suite_name, test_name, tags)                         \
   class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
       : public test_suite_name {                                               \
    public:                                                                     \
@@ -428,7 +428,7 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
           ->AddTestPattern(                                                    \
               GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
               new ::testing::internal::TestMetaFactory<GTEST_TEST_CLASS_NAME_( \
-                  test_suite_name, test_name)>());                             \
+                  test_suite_name, test_name)>(), #tags);                      \
       return 0;                                                                \
     }                                                                          \
     static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
@@ -440,11 +440,14 @@ internal::CartesianProductHolder<Generator...> Combine(const Generator&... g) {
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
+#define TEST_P(test_case_name, test_name) TAGGED_TEST_P(test_case_name, test_name, )
+
 // The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
 // generator and an optional function or functor that generates custom test name
 // suffixes based on the test parameters. Such a function or functor should
 // accept one argument of type testing::TestParamInfo<class ParamType>, and
 // return std::string.
+
 //
 // testing::PrintToStringParamName is a builtin test suffix generator that
 // returns the value of testing::PrintToString(GetParam()).

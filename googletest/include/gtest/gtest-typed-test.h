@@ -194,10 +194,14 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   typedef ::testing::internal::NameGeneratorSelector<__VA_ARGS__>::type  \
       GTEST_NAME_GENERATOR_(CaseName)
 
-# define TYPED_TEST(CaseName, TestName)                                       \
+# define TAGGED_TYPED_TEST(CaseName, TestName, tags)                          \
   template <typename gtest_TypeParam_>                                        \
   class GTEST_TEST_CLASS_NAME_(CaseName, TestName)                            \
       : public CaseName<gtest_TypeParam_> {                                   \
+   public:                                                                    \
+     static const char* getTags() {                                           \
+       return #tags;                                                          \
+     }                                                                        \
    private:                                                                   \
     typedef CaseName<gtest_TypeParam_> TestFixture;                           \
     typedef gtest_TypeParam_ TypeParam;                                       \
@@ -227,6 +231,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   static_assert(::testing::internal::TypedTestCaseIsDeprecated(), ""); \
   TYPED_TEST_SUITE
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
+
+# define TYPED_TEST(CaseName, TestName) TAGGED_TYPED_TEST(CaseName, TestName, )
 
 #endif  // GTEST_HAS_TYPED_TEST
 
@@ -269,10 +275,14 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   TYPED_TEST_SUITE_P
 #endif  // GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 
-#define TYPED_TEST_P(SuiteName, TestName)                             \
+#define TAGGED_TYPED_TEST_P(SuiteName, TestName, tags)                \
   namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                       \
     template <typename gtest_TypeParam_>                              \
     class TestName : public SuiteName<gtest_TypeParam_> {             \
+   public:                                                            \
+    static const char* getTags() {                                    \
+      return #tags;                                                   \
+    }                                                                 \
      private:                                                         \
       typedef SuiteName<gtest_TypeParam_> TestFixture;                \
       typedef gtest_TypeParam_ TypeParam;                             \
@@ -285,6 +295,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   template <typename gtest_TypeParam_>                                \
   void GTEST_SUITE_NAMESPACE_(                                        \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
+
+#define TYPED_TEST_P(CaseName, TestName) TAGGED_TYPED_TEST_P(CaseName, TestName, )
 
 #define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                            \
   namespace GTEST_SUITE_NAMESPACE_(SuiteName) {                                \
