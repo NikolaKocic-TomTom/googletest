@@ -580,7 +580,8 @@ GTEST_API_ TestInfo* MakeAndRegisterTestInfo(
     const char* test_suite_name, const char* name, const char* type_param,
     const char* value_param, CodeLocation code_location,
     TypeId fixture_class_id, SetUpTestSuiteFunc set_up_tc,
-    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory);
+    TearDownTestSuiteFunc tear_down_tc, TestFactoryBase* factory,
+    const char* tags);
 
 // If *pstr starts with the given prefix, modifies *pstr to be right
 // past the prefix and returns true; otherwise leaves *pstr unchanged
@@ -735,7 +736,8 @@ class TypeParameterizedTest {
             code_location.file.c_str(), code_location.line),
         SuiteApiResolver<TestClass>::GetTearDownCaseOrSuite(
             code_location.file.c_str(), code_location.line),
-        new TestFactoryImpl<TestClass>);
+        new TestFactoryImpl<TestClass>,
+        TestClass::getTags());
 
     // Next, recurses (at compile time) with the tail of the type list.
     return TypeParameterizedTest<Fixture, TestSel,
@@ -1528,7 +1530,7 @@ class NeverThrown {
   test_suite_name##_##test_name##_Test
 
 // Helper macro for defining tests.
-#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id)       \
+#define GTEST_TEST_(test_suite_name, test_name, parent_class, parent_id, tags) \
   static_assert(sizeof(GTEST_STRINGIFY_(test_suite_name)) > 1,                 \
                 "test_suite_name must not be empty");                          \
   static_assert(sizeof(GTEST_STRINGIFY_(test_name)) > 1,                       \
@@ -1564,7 +1566,7 @@ class NeverThrown {
           ::testing::internal::SuiteApiResolver<                               \
               parent_class>::GetTearDownCaseOrSuite(__FILE__, __LINE__),       \
           new ::testing::internal::TestFactoryImpl<GTEST_TEST_CLASS_NAME_(     \
-              test_suite_name, test_name)>);                                   \
+              test_suite_name, test_name)>, #tags);                            \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
 #endif  // GOOGLETEST_INCLUDE_GTEST_INTERNAL_GTEST_INTERNAL_H_
