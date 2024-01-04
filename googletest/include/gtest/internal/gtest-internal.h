@@ -1290,6 +1290,11 @@ constexpr bool InstantiateTypedTestCase_P_IsDeprecated() { return true; }
     try { \
       GTEST_SUPPRESS_UNREACHABLE_CODE_WARNING_BELOW_(statement); \
     } \
+    catch (const std::exception& e) { \
+      /* Log the what() string of std::exception to help debugging why test failed. */ \
+      fprintf(stderr, "Warning: GTest caught std::exception [%s]\n", e.what()); \
+      goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
+    } \
     catch (...) { \
       goto GTEST_CONCAT_TOKEN_(gtest_label_testnothrow_, __LINE__); \
     } \
