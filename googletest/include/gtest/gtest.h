@@ -2170,6 +2170,9 @@ constexpr bool StaticAssertTypeEq() noexcept {
   GTEST_TEST_(test_suite_name, test_name, ::testing::Test, \
               ::testing::internal::GetTestTypeId())
 
+#define TAGGED_TEST(test_suite_name, test_name, tags) \
+  GTEST_TEST(test_suite_name, test_name)
+
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
 #if !(defined(GTEST_DONT_DEFINE_TEST) && GTEST_DONT_DEFINE_TEST)
@@ -2204,6 +2207,10 @@ constexpr bool StaticAssertTypeEq() noexcept {
 #define GTEST_TEST_F(test_fixture, test_name)        \
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
               ::testing::internal::GetTypeId<test_fixture>())
+
+#define TAGGED_TEST_F(test_fixture, test_name, tags) \
+  GTEST_TEST_F(test_fixture, test_name)
+
 #if !(defined(GTEST_DONT_DEFINE_TEST_F) && GTEST_DONT_DEFINE_TEST_F)
 #define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
 #endif

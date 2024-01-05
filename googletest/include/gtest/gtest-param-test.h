@@ -476,6 +476,8 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
 
+#define TAGGED_TEST_P(test_suite_name, test_name, tags) TEST_P(test_suite_name, test_name)
+
 // The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
 // generator and an optional function or functor that generates custom test name
 // suffixes based on the test parameters. Such a function or functor should

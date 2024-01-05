@@ -223,6 +223,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   void GTEST_TEST_CLASS_NAME_(CaseName,                                       \
                               TestName)<gtest_TypeParam_>::TestBody()
 
+#define TAGGED_TYPED_TEST(CaseName, TestName, tags) TYPED_TEST(CaseName, TestName)
+
 // Legacy API is deprecated but still available
 #ifndef GTEST_REMOVE_LEGACY_TEST_CASEAPI_
 #define TYPED_TEST_CASE                                                \
@@ -284,6 +286,8 @@ INSTANTIATE_TYPED_TEST_SUITE_P(My, FooTest, MyTypes);
   template <typename gtest_TypeParam_>                              \
   void GTEST_SUITE_NAMESPACE_(                                      \
       SuiteName)::TestName<gtest_TypeParam_>::TestBody()
+
+#define TAGGED_TYPED_TEST_P(SuiteName, TestName, tags) TYPED_TEST_P(SuiteName, TestName)
 
 // Note: this won't work correctly if the trailing arguments are macros.
 #define REGISTER_TYPED_TEST_SUITE_P(SuiteName, ...)                         \
