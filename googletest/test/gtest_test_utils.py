@@ -65,7 +65,9 @@ def SetEnvVar(env_var, value):
 # Here we expose a class from a particular module, depending on the
 # environment. The comment suppresses the 'Invalid variable name' lint
 # complaint.
-TestCase = _test_module.TestCase  # pylint: disable=C6409
+class TestCase(_test_module.TestCase):  # pylint: disable=C6409
+  assert_ = _test_module.TestCase.assertTrue
+  assertEquals = _test_module.TestCase.assertEqual
 
 # Initially maps a flag to its default value. After
 # _ParseAndStripGTestFlags() is called, maps a flag to its actual value.
