@@ -470,8 +470,19 @@ namespace {
 // inserted to report ether an error or a log message.
 //
 // This configuration bit will likely be removed at some point.
-constexpr bool kErrorOnUninstantiatedParameterizedTest = true;
-constexpr bool kErrorOnUninstantiatedTypeParameterizedTest = true;
+constexpr bool kErrorOnUninstantiatedParameterizedTest =
+#if GTEST_DISABLE_UNINSTANTIATED_PARAMETERIZED_TESTSUITE_ERROR
+  false;
+#else
+  true;
+#endif
+
+constexpr bool kErrorOnUninstantiatedTypeParameterizedTest =
+#if GTEST_DISABLE_UNINSTANTIATED_TYPE_PARAMETERIZED_TEST_SUITE_ERROR
+  false;
+#else
+  true;
+#endif
 
 // A test that fails at a given file/line location with a given message.
 class FailureTest : public Test {
