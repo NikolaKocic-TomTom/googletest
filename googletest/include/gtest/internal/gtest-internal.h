@@ -907,6 +907,49 @@ template <typename T>
 constexpr bool HasDebugStringAndShortDebugString<T>::value;
 #endif
 
+#if GTEST_PRINT_BOOST_OPTIONAL
+
+// IsBoostOptionalType<T>::value is a compile-time bool constant
+// that's true if and only if T has methods has_value(), operator*() and operator!(),
+// that return appropriate types, and, to distinguish it from the std::optional and others,
+// that T::reference_const_type is defined.
+template <typename T>
+class IsBoostOptionalType {
+ private:
+  template <typename C, typename reference_const_type = typename C::reference_const_type>
+  static auto CheckAsteriskOperator(C*) -> typename std::is_same<
+      reference_const_type, decltype(std::declval<const C>().operator*())>::type;
+  template <typename>
+  static std::false_type CheckAsteriskOperator(...);
+
+  template <typename C>
+  static auto CheckExclamationMarkOperator(C*) -> typename std::is_same<
+      bool, decltype(std::declval<const C>().operator!())>::type;
+  template <typename>
+  static std::false_type CheckExclamationMarkOperator(...);
+
+  template <typename C>
+  static auto CheckHasValueMethod(C*) -> typename std::is_same<
+      bool, decltype(std::declval<const C>().has_value())>::type;
+  template <typename>
+  static std::false_type CheckHasValueMethod(...);
+
+  using HasAsteriskOperator = decltype(CheckAsteriskOperator<T>(nullptr));
+  using HasExclamationMarkOperator = decltype(CheckExclamationMarkOperator<T>(nullptr));
+  using HasHasValueMethod = decltype(CheckHasValueMethod<T>(nullptr));
+
+ public:
+  static constexpr bool value =
+      HasAsteriskOperator::value &&
+      HasExclamationMarkOperator::value &&
+      HasHasValueMethod::value;
+};
+
+template <typename T>
+constexpr bool IsBoostOptionalType<T>::value;
+
+#endif  // GTEST_PRINT_BOOST_OPTIONAL
+
 // When the compiler sees expression IsContainerTest<C>(0), if C is an
 // STL-style container class, the first overload of IsContainerTest
 // will be viable (since both C::iterator* and C::const_iterator* are

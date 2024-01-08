@@ -228,6 +228,25 @@ struct StreamPrinter {
 
 }  // namespace internal_stream_operator_without_lexical_name_lookup
 
+#if GTEST_PRINT_BOOST_OPTIONAL
+
+struct BoostOptionalPrinter {
+  template <typename T,
+            typename = typename std::enable_if<
+                internal::IsBoostOptionalType<T>::value>::type>
+  static void PrintValue(const T& value, ::std::ostream* os) {
+      *os << '(';
+      if (!value) {
+        *os << "nullopt";
+      } else {
+        UniversalPrint(*value, os);
+      }
+      *os << ')';
+  }
+};
+
+#endif  // GTEST_PRINT_BOOST_OPTIONAL
+
 struct ProtobufPrinter {
   // We print a protobuf using its ShortDebugString() when the string
   // doesn't exceed this many characters; otherwise we print it using
@@ -330,6 +349,9 @@ void PrintWithFallback(const T& value, ::std::ostream* os) {
 #ifdef GTEST_HAS_ABSL
       ConvertibleToAbslStringifyPrinter,
 #endif  // GTEST_HAS_ABSL
+#if GTEST_PRINT_BOOST_OPTIONAL
+      BoostOptionalPrinter,
+#endif  // GTEST_PRINT_BOOST_OPTIONAL
       internal_stream_operator_without_lexical_name_lookup::StreamPrinter,
       ConvertibleToIntegerPrinter, ConvertibleToStringViewPrinter,
       RawBytesPrinter, FallbackPrinter>::type;
