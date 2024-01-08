@@ -599,6 +599,10 @@ class GTEST_API_ TestInfo {
   // Returns the result of the test.
   const TestResult* result() const { return &result_; }
 
+  void setTags(const std::string& tags) { tags_ = tags; }
+
+  const std::string& tags() const { return tags_; }
+
  private:
 #ifdef GTEST_HAS_DEATH_TEST
   friend class internal::DefaultDeathTestFactory;
@@ -612,7 +616,7 @@ class GTEST_API_ TestInfo {
       const char* value_param, internal::CodeLocation code_location,
       internal::TypeId fixture_class_id, internal::SetUpTestSuiteFunc set_up_tc,
       internal::TearDownTestSuiteFunc tear_down_tc,
-      internal::TestFactoryBase* factory);
+      internal::TestFactoryBase* factory, const char* tags);
 
   // Constructs a TestInfo object. The newly constructed instance assumes
   // ownership of the factory object.
@@ -662,6 +666,8 @@ class GTEST_API_ TestInfo {
   // This field is mutable and needs to be reset before running the
   // test for the second time.
   TestResult result_;
+
+  std::string tags_;
 
   TestInfo(const TestInfo&) = delete;
   TestInfo& operator=(const TestInfo&) = delete;
@@ -2168,7 +2174,11 @@ constexpr bool StaticAssertTypeEq() noexcept {
 // framework.
 #define GTEST_TEST(test_suite_name, test_name)             \
   GTEST_TEST_(test_suite_name, test_name, ::testing::Test, \
-              ::testing::internal::GetTestTypeId())
+              ::testing::internal::GetTestTypeId(), )
+
+#define TAGGED_TEST(test_suite_name, test_name, tags)      \
+  GTEST_TEST_(test_suite_name, test_name, ::testing::Test, \
+              ::testing::internal::GetTestTypeId(), tags)
 
 // Define this macro to 1 to omit the definition of TEST(), which
 // is a generic name and clashes with some other libraries.
@@ -2203,7 +2213,12 @@ constexpr bool StaticAssertTypeEq() noexcept {
 //   }
 #define GTEST_TEST_F(test_fixture, test_name)        \
   GTEST_TEST_(test_fixture, test_name, test_fixture, \
-              ::testing::internal::GetTypeId<test_fixture>())
+              ::testing::internal::GetTypeId<test_fixture>(), )
+
+#define TAGGED_TEST_F(test_fixture, test_name, tags) \
+  GTEST_TEST_(test_fixture, test_name, test_fixture, \
+              ::testing::internal::GetTypeId<test_fixture>(), tags)
+
 #if !(defined(GTEST_DONT_DEFINE_TEST_F) && GTEST_DONT_DEFINE_TEST_F)
 #define TEST_F(test_fixture, test_name) GTEST_TEST_F(test_fixture, test_name)
 #endif
@@ -2282,7 +2297,8 @@ GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4805 4100
 template <int&... ExplicitParameterBarrier, typename Factory>
 TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
                        const char* type_param, const char* value_param,
-                       const char* file, int line, Factory factory) {
+                       const char* file, int line, Factory factory,
+                       const char* tags = "") {
   using TestT = typename std::remove_pointer<decltype(factory())>::type;
 
   class FactoryImpl : public internal::TestFactoryBase {
@@ -2299,7 +2315,8 @@ TestInfo* RegisterTest(const char* test_suite_name, const char* test_name,
       internal::CodeLocation(file, line), internal::GetTypeId<TestT>(),
       internal::SuiteApiResolver<TestT>::GetSetUpCaseOrSuite(file, line),
       internal::SuiteApiResolver<TestT>::GetTearDownCaseOrSuite(file, line),
-      new FactoryImpl{std::move(factory)});
+      new FactoryImpl{std::move(factory)},
+      tags);
 }
 
 }  // namespace testing

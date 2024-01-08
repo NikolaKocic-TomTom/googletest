@@ -447,7 +447,7 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
   return internal::ParamConverterGenerator<T>(gen);
 }
 
-#define TEST_P(test_suite_name, test_name)                                     \
+#define TAGGED_TEST_P(test_suite_name, test_name, tags)                        \
   class GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)                     \
       : public test_suite_name,                                                \
         private ::testing::internal::GTestNonCopyable {                        \
@@ -466,7 +466,7 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
               GTEST_STRINGIFY_(test_suite_name), GTEST_STRINGIFY_(test_name),  \
               new ::testing::internal::TestMetaFactory<GTEST_TEST_CLASS_NAME_( \
                   test_suite_name, test_name)>(),                              \
-              ::testing::internal::CodeLocation(__FILE__, __LINE__));          \
+              ::testing::internal::CodeLocation(__FILE__, __LINE__), #tags);   \
       return 0;                                                                \
     }                                                                          \
     static int gtest_registering_dummy_ GTEST_ATTRIBUTE_UNUSED_;               \
@@ -475,6 +475,8 @@ internal::ParamConverterGenerator<T> ConvertGenerator(
                              test_name)::gtest_registering_dummy_ =            \
       GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::AddToRegistry();     \
   void GTEST_TEST_CLASS_NAME_(test_suite_name, test_name)::TestBody()
+
+#define TEST_P(test_suite_name, test_name) TAGGED_TEST_P(test_suite_name, test_name, )
 
 // The last argument to INSTANTIATE_TEST_SUITE_P allows the user to specify
 // generator and an optional function or functor that generates custom test name
