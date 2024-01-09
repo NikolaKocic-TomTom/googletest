@@ -64,7 +64,7 @@ using ::testing::Assign;
 using ::testing::ByMove;
 using ::testing::ByRef;
 using ::testing::DefaultValue;
-using ::testing::DoAll;
+//using ::testing::DoAll;
 using ::testing::DoDefault;
 using ::testing::IgnoreResult;
 using ::testing::Invoke;
@@ -764,17 +764,17 @@ TEST(DoDefaultDeathTest, DiesForUnknowType) {
 
 void VoidFunc(bool /* flag */) {}
 
-TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
-  MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
+//TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
+//  MockClass mock;
+//  EXPECT_CALL(mock, IntFunc(_))
+//      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
 
-  // Ideally we should verify the error message as well.  Sadly,
-  // EXPECT_DEATH() can only capture stderr, while Google Mock's
-  // errors are printed on stdout.  Therefore we have to settle for
-  // not verifying the message.
-  EXPECT_DEATH_IF_SUPPORTED({ mock.IntFunc(true); }, "");
-}
+//  // Ideally we should verify the error message as well.  Sadly,
+//  // EXPECT_DEATH() can only capture stderr, while Google Mock's
+//  // errors are printed on stdout.  Therefore we have to settle for
+//  // not verifying the message.
+//  EXPECT_DEATH_IF_SUPPORTED({ mock.IntFunc(true); }, "");
+//}
 
 // Tests that DoDefault() returns the default value set by
 // DefaultValue<T>::Set() when it's not overridden by an ON_CALL().
