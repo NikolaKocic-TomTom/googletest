@@ -134,7 +134,7 @@ using testing::AllOf;
 using testing::AnyOf;
 using testing::Assign;
 using testing::ContainerEq;
-using testing::DoAll;
+//using testing::DoAll;
 using testing::DoDefault;
 using testing::DoubleEq;
 using testing::ElementsAre;
@@ -169,6 +169,7 @@ using testing::ResultOf;
 using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
+using testing::SaveArg;
 using testing::SetArgPointee;
 using testing::SetArrayArgument;
 using testing::StartsWith;
@@ -205,6 +206,7 @@ class Interface {
   virtual void VoidFromFloat(float n) = 0;
   virtual void VoidFromDouble(double n) = 0;
   virtual void VoidFromVector(const std::vector<int>& v) = 0;
+  virtual void VoidFromTwoInts(int x, int y) = 0;
 };
 
 class Mock: public Interface {
@@ -220,6 +222,7 @@ class Mock: public Interface {
   MOCK_METHOD1(VoidFromFloat, void(float n));
   MOCK_METHOD1(VoidFromDouble, void(double n));
   MOCK_METHOD1(VoidFromVector, void(const std::vector<int>& v));
+  MOCK_METHOD2(VoidFromTwoInts, void(int x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(Mock);
@@ -387,6 +390,18 @@ TEST(LinkTest, TestDoAll) {
 
   EXPECT_CALL(mock, VoidFromString(_))
       .WillOnce(DoAll(SetArgPointee<0>('y'), Return()));
+
+  //EXPECT_CALL(mock, VoidFromString(_))
+  //    .WillOnce(DoAll(SetArgPointee<0>('y')));
+
+  int saved_int_arg_0;
+  int saved_int_arg_1;
+  EXPECT_CALL(mock, VoidFromTwoInts(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&saved_int_arg_0), SaveArg<0>(&saved_int_arg_1), Return()));
+
+  EXPECT_CALL(mock, VoidFromTwoInts(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&saved_int_arg_0), SaveArg<0>(&saved_int_arg_1)));
+
   mock.VoidFromString(&ch);
 }
 
