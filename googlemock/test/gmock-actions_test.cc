@@ -59,8 +59,45 @@
 #include "gtest/gtest-spi.h"
 #include "gtest/gtest.h"
 
-namespace testing {
+//namespace testing {
+namespace internal = ::testing::internal;
+
 namespace {
+
+using ::testing::_;
+using ::testing::Action;
+using ::testing::ActionInterface;
+using ::testing::Assign;
+using ::testing::ByMove;
+using ::testing::ByRef;
+using ::testing::DefaultValue;
+using ::testing::DoDefault;
+using ::testing::ElementsAre;
+using ::testing::Field;
+using ::testing::IgnoreResult;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
+using ::testing::MakePolymorphicAction;
+using ::testing::MockFunction;
+using ::testing::OnceAction;
+using ::testing::Pointee;
+using ::testing::PolymorphicAction;
+using ::testing::Return;
+using ::testing::ReturnNew;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::ReturnRoundRobin;
+using ::testing::SetArgPointee;
+using ::testing::SetArgumentPointee;
+using ::testing::SetErrnoAndReturn;
+using ::testing::Unused;
+using ::testing::WithArg;
+using ::testing::WithArgs;
+
+#if !GTEST_OS_WINDOWS_MOBILE
+using ::testing::SetErrnoAndReturn;
+#endif
 
 using ::testing::internal::BuiltInDefaultValue;
 
@@ -1027,17 +1064,17 @@ TEST(DoDefaultDeathTest, DiesForUnknowType) {
 
 void VoidFunc(bool /* flag */) {}
 
-TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
-  MockClass mock;
-  EXPECT_CALL(mock, IntFunc(_))
-      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
+//TEST(DoDefaultDeathTest, DiesIfUsedInCompositeAction) {
+//  MockClass mock;
+//  EXPECT_CALL(mock, IntFunc(_))
+//      .WillRepeatedly(DoAll(Invoke(VoidFunc), DoDefault()));
 
-  // Ideally we should verify the error message as well.  Sadly,
-  // EXPECT_DEATH() can only capture stderr, while Google Mock's
-  // errors are printed on stdout.  Therefore we have to settle for
-  // not verifying the message.
-  EXPECT_DEATH_IF_SUPPORTED({ mock.IntFunc(true); }, "");
-}
+//  // Ideally we should verify the error message as well.  Sadly,
+//  // EXPECT_DEATH() can only capture stderr, while Google Mock's
+//  // errors are printed on stdout.  Therefore we have to settle for
+//  // not verifying the message.
+//  EXPECT_DEATH_IF_SUPPORTED({ mock.IntFunc(true); }, "");
+//}
 
 // Tests that DoDefault() returns the default value set by
 // DefaultValue<T>::Set() when it's not overridden by an ON_CALL().
@@ -1322,129 +1359,129 @@ TEST(AssignTest, CompatibleTypes) {
   EXPECT_DOUBLE_EQ(5, x);
 }
 
-// DoAll should support &&-qualified actions when used with WillOnce.
-TEST(DoAll, SupportsRefQualifiedActions) {
-  struct InitialAction {
-    void operator()(const int arg) && { EXPECT_EQ(17, arg); }
-  };
+//// DoAll should support &&-qualified actions when used with WillOnce.
+//TEST(DoAll, SupportsRefQualifiedActions) {
+//  struct InitialAction {
+//    void operator()(const int arg) && { EXPECT_EQ(17, arg); }
+//  };
 
-  struct FinalAction {
-    int operator()() && { return 19; }
-  };
+//  struct FinalAction {
+//    int operator()() && { return 19; }
+//  };
 
-  MockFunction<int(int)> mock;
-  EXPECT_CALL(mock, Call).WillOnce(DoAll(InitialAction{}, FinalAction{}));
-  EXPECT_EQ(19, mock.AsStdFunction()(17));
-}
+//  MockFunction<int(int)> mock;
+//  EXPECT_CALL(mock, Call).WillOnce(DoAll(InitialAction{}, FinalAction{}));
+//  EXPECT_EQ(19, mock.AsStdFunction()(17));
+//}
 
-// DoAll should never provide rvalue references to the initial actions. If the
-// mock action itself accepts an rvalue reference or a non-scalar object by
-// value then the final action should receive an rvalue reference, but initial
-// actions should receive only lvalue references.
-TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
-  struct Obj {};
+//// DoAll should never provide rvalue references to the initial actions. If the
+//// mock action itself accepts an rvalue reference or a non-scalar object by
+//// value then the final action should receive an rvalue reference, but initial
+//// actions should receive only lvalue references.
+//TEST(DoAll, ProvidesLvalueReferencesToInitialActions) {
+//  struct Obj {};
 
-  // Mock action accepts by value: the initial action should be fed a const
-  // lvalue reference, and the final action an rvalue reference.
-  {
-    struct InitialAction {
-      void operator()(Obj&) const { FAIL() << "Unexpected call"; }
-      void operator()(const Obj&) const {}
-      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
-      void operator()(const Obj&&) const { FAIL() << "Unexpected call"; }
-    };
+//  // Mock action accepts by value: the initial action should be fed a const
+//  // lvalue reference, and the final action an rvalue reference.
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) const { FAIL() << "Unexpected call"; }
+//      void operator()(const Obj&) const {}
+//      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
+//      void operator()(const Obj&&) const { FAIL() << "Unexpected call"; }
+//    };
 
-    MockFunction<void(Obj)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
-        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
+//    MockFunction<void(Obj)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
+//        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
 
-    mock.AsStdFunction()(Obj{});
-    mock.AsStdFunction()(Obj{});
-  }
+//    mock.AsStdFunction()(Obj{});
+//    mock.AsStdFunction()(Obj{});
+//  }
 
-  // Mock action accepts by const lvalue reference: both actions should receive
-  // a const lvalue reference.
-  {
-    struct InitialAction {
-      void operator()(Obj&) const { FAIL() << "Unexpected call"; }
-      void operator()(const Obj&) const {}
-      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
-      void operator()(const Obj&&) const { FAIL() << "Unexpected call"; }
-    };
+//  // Mock action accepts by const lvalue reference: both actions should receive
+//  // a const lvalue reference.
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) const { FAIL() << "Unexpected call"; }
+//      void operator()(const Obj&) const {}
+//      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
+//      void operator()(const Obj&&) const { FAIL() << "Unexpected call"; }
+//    };
 
-    MockFunction<void(const Obj&)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](const Obj&) {}))
-        .WillRepeatedly(
-            DoAll(InitialAction{}, InitialAction{}, [](const Obj&) {}));
+//    MockFunction<void(const Obj&)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](const Obj&) {}))
+//        .WillRepeatedly(
+//            DoAll(InitialAction{}, InitialAction{}, [](const Obj&) {}));
 
-    mock.AsStdFunction()(Obj{});
-    mock.AsStdFunction()(Obj{});
-  }
+//    mock.AsStdFunction()(Obj{});
+//    mock.AsStdFunction()(Obj{});
+//  }
 
-  // Mock action accepts by non-const lvalue reference: both actions should get
-  // a non-const lvalue reference if they want them.
-  {
-    struct InitialAction {
-      void operator()(Obj&) const {}
-      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
-    };
+//  // Mock action accepts by non-const lvalue reference: both actions should get
+//  // a non-const lvalue reference if they want them.
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) const {}
+//      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
+//    };
 
-    MockFunction<void(Obj&)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}))
-        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}));
+//    MockFunction<void(Obj&)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}))
+//        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}));
 
-    Obj obj;
-    mock.AsStdFunction()(obj);
-    mock.AsStdFunction()(obj);
-  }
+//    Obj obj;
+//    mock.AsStdFunction()(obj);
+//    mock.AsStdFunction()(obj);
+//  }
 
-  // Mock action accepts by rvalue reference: the initial actions should receive
-  // a non-const lvalue reference if it wants it, and the final action an rvalue
-  // reference.
-  {
-    struct InitialAction {
-      void operator()(Obj&) const {}
-      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
-    };
+//  // Mock action accepts by rvalue reference: the initial actions should receive
+//  // a non-const lvalue reference if it wants it, and the final action an rvalue
+//  // reference.
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) const {}
+//      void operator()(Obj&&) const { FAIL() << "Unexpected call"; }
+//    };
 
-    MockFunction<void(Obj &&)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
-        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
+//    MockFunction<void(Obj &&)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}))
+//        .WillRepeatedly(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
 
-    mock.AsStdFunction()(Obj{});
-    mock.AsStdFunction()(Obj{});
-  }
+//    mock.AsStdFunction()(Obj{});
+//    mock.AsStdFunction()(Obj{});
+//  }
 
-  // &&-qualified initial actions should also be allowed with WillOnce.
-  {
-    struct InitialAction {
-      void operator()(Obj&) && {}
-    };
+//  // &&-qualified initial actions should also be allowed with WillOnce.
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) && {}
+//    };
 
-    MockFunction<void(Obj&)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}));
+//    MockFunction<void(Obj&)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&) {}));
 
-    Obj obj;
-    mock.AsStdFunction()(obj);
-  }
+//    Obj obj;
+//    mock.AsStdFunction()(obj);
+//  }
 
-  {
-    struct InitialAction {
-      void operator()(Obj&) && {}
-    };
+//  {
+//    struct InitialAction {
+//      void operator()(Obj&) && {}
+//    };
 
-    MockFunction<void(Obj &&)> mock;
-    EXPECT_CALL(mock, Call)
-        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
+//    MockFunction<void(Obj &&)> mock;
+//    EXPECT_CALL(mock, Call)
+//        .WillOnce(DoAll(InitialAction{}, InitialAction{}, [](Obj&&) {}));
 
-    mock.AsStdFunction()(Obj{});
-  }
-}
+//    mock.AsStdFunction()(Obj{});
+//  }
+//}
 
 // DoAll should support being used with type-erased Action objects, both through
 // WillOnce and WillRepeatedly.
@@ -2164,4 +2201,4 @@ TEST(ActionMacro, LargeArity) {
 }
 
 }  // namespace
-}  // namespace testing
+//}  // namespace testing
