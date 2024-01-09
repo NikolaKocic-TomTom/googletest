@@ -133,7 +133,7 @@ using testing::AllOf;
 using testing::AnyOf;
 using testing::Assign;
 using testing::ContainerEq;
-using testing::DoAll;
+//using testing::DoAll;
 using testing::DoDefault;
 using testing::DoubleEq;
 using testing::ElementsAre;
@@ -387,6 +387,10 @@ TEST(LinkTest, TestDoAll) {
 
   EXPECT_CALL(mock, VoidFromString(_))
       .WillOnce(DoAll(SetArgPointee<0>('y'), Return()));
+
+  EXPECT_CALL(mock, VoidFromString(_))
+      .WillOnce(DoAll(SetArgPointee<0>('y')));
+
   mock.VoidFromString(&ch);
 }
 
