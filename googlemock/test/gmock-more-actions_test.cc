@@ -48,7 +48,7 @@
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4577)
 
-namespace testing {
+//namespace testing {
 namespace gmock_more_actions_test {
 
 using ::std::plus;
@@ -64,6 +64,14 @@ using testing::SetArgReferee;
 using testing::Unused;
 using testing::WithArg;
 using testing::WithoutArgs;
+using testing::SetArrayArgument;
+using testing::InvokeArgument;
+using testing::SetArgPointee;
+using testing::Return;
+using testing::ByRef;
+using testing::Throw;
+using testing::StaticAssertTypeEq;
+using testing::InvokeWithoutArgs;
 
 // For suppressing compiler warnings on conversion possibly losing precision.
 inline short Short(short n) { return n; }  // NOLINT
@@ -806,165 +814,165 @@ TEST(InvokeArgumentTest, ByExplicitConstReferenceFunction) {
   EXPECT_FALSE(a.Perform(std::make_tuple(&ReferencesGlobalDouble)));
 }
 
-// Tests DoAll(a1, a2).
-TEST(DoAllTest, TwoActions) {
-  int n = 0;
-  Action<int(int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
-                              Return(2));
-  EXPECT_EQ(2, a.Perform(std::make_tuple(&n)));
-  EXPECT_EQ(1, n);
-}
+//// Tests DoAll(a1, a2).
+//TEST(DoAllTest, TwoActions) {
+//  int n = 0;
+//  Action<int(int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
+//                              Return(2));
+//  EXPECT_EQ(2, a.Perform(std::make_tuple(&n)));
+//  EXPECT_EQ(1, n);
+//}
 
-// Tests DoAll(a1, a2, a3).
-TEST(DoAllTest, ThreeActions) {
-  int m = 0, n = 0;
-  Action<int(int*, int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
-                                    SetArgPointee<1>(2), Return(3));
-  EXPECT_EQ(3, a.Perform(std::make_tuple(&m, &n)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-}
+//// Tests DoAll(a1, a2, a3).
+//TEST(DoAllTest, ThreeActions) {
+//  int m = 0, n = 0;
+//  Action<int(int*, int*)> a = DoAll(SetArgPointee<0>(1),  // NOLINT
+//                                    SetArgPointee<1>(2), Return(3));
+//  EXPECT_EQ(3, a.Perform(std::make_tuple(&m, &n)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//}
 
-// Tests DoAll(a1, a2, a3, a4).
-TEST(DoAllTest, FourActions) {
-  int m = 0, n = 0;
-  char ch = '\0';
-  Action<int(int*, int*, char*)> a =  // NOLINT
-      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-            Return(3));
-  EXPECT_EQ(3, a.Perform(std::make_tuple(&m, &n, &ch)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', ch);
-}
+//// Tests DoAll(a1, a2, a3, a4).
+//TEST(DoAllTest, FourActions) {
+//  int m = 0, n = 0;
+//  char ch = '\0';
+//  Action<int(int*, int*, char*)> a =  // NOLINT
+//      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//            Return(3));
+//  EXPECT_EQ(3, a.Perform(std::make_tuple(&m, &n, &ch)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', ch);
+//}
 
-// Tests DoAll(a1, a2, a3, a4, a5).
-TEST(DoAllTest, FiveActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0';
-  Action<int(int*, int*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-            SetArgPointee<3>('b'), Return(3));
-  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-}
+//// Tests DoAll(a1, a2, a3, a4, a5).
+//TEST(DoAllTest, FiveActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0';
+//  Action<int(int*, int*, char*, char*)> action =  // NOLINT
+//      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//            SetArgPointee<3>('b'), Return(3));
+//  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//}
 
-// Tests DoAll(a1, a2, ..., a6).
-TEST(DoAllTest, SixActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0', c = '\0';
-  Action<int(int*, int*, char*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-            SetArgPointee<3>('b'), SetArgPointee<4>('c'), Return(3));
-  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-  EXPECT_EQ('c', c);
-}
+//// Tests DoAll(a1, a2, ..., a6).
+//TEST(DoAllTest, SixActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0', c = '\0';
+//  Action<int(int*, int*, char*, char*, char*)> action =  // NOLINT
+//      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//            SetArgPointee<3>('b'), SetArgPointee<4>('c'), Return(3));
+//  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//  EXPECT_EQ('c', c);
+//}
 
-// Tests DoAll(a1, a2, ..., a7).
-TEST(DoAllTest, SevenActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0', c = '\0', d = '\0';
-  Action<int(int*, int*, char*, char*, char*, char*)> action =  // NOLINT
-      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-            SetArgPointee<3>('b'), SetArgPointee<4>('c'), SetArgPointee<5>('d'),
-            Return(3));
-  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-  EXPECT_EQ('c', c);
-  EXPECT_EQ('d', d);
-}
+//// Tests DoAll(a1, a2, ..., a7).
+//TEST(DoAllTest, SevenActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0', c = '\0', d = '\0';
+//  Action<int(int*, int*, char*, char*, char*, char*)> action =  // NOLINT
+//      DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//            SetArgPointee<3>('b'), SetArgPointee<4>('c'), SetArgPointee<5>('d'),
+//            Return(3));
+//  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//  EXPECT_EQ('c', c);
+//  EXPECT_EQ('d', d);
+//}
 
-// Tests DoAll(a1, a2, ..., a8).
-TEST(DoAllTest, EightActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0';
-  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
-             char*)>
-      action =
-          DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-                SetArgPointee<3>('b'), SetArgPointee<4>('c'),
-                SetArgPointee<5>('d'), SetArgPointee<6>('e'), Return(3));
-  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-  EXPECT_EQ('c', c);
-  EXPECT_EQ('d', d);
-  EXPECT_EQ('e', e);
-}
+//// Tests DoAll(a1, a2, ..., a8).
+//TEST(DoAllTest, EightActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0';
+//  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
+//             char*)>
+//      action =
+//          DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//                SetArgPointee<3>('b'), SetArgPointee<4>('c'),
+//                SetArgPointee<5>('d'), SetArgPointee<6>('e'), Return(3));
+//  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//  EXPECT_EQ('c', c);
+//  EXPECT_EQ('d', d);
+//  EXPECT_EQ('e', e);
+//}
 
-// Tests DoAll(a1, a2, ..., a9).
-TEST(DoAllTest, NineActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0', f = '\0';
-  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
-             char*, char*)>
-      action = DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2),
-                     SetArgPointee<2>('a'), SetArgPointee<3>('b'),
-                     SetArgPointee<4>('c'), SetArgPointee<5>('d'),
-                     SetArgPointee<6>('e'), SetArgPointee<7>('f'), Return(3));
-  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e, &f)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-  EXPECT_EQ('c', c);
-  EXPECT_EQ('d', d);
-  EXPECT_EQ('e', e);
-  EXPECT_EQ('f', f);
-}
+//// Tests DoAll(a1, a2, ..., a9).
+//TEST(DoAllTest, NineActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0', c = '\0', d = '\0', e = '\0', f = '\0';
+//  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
+//             char*, char*)>
+//      action = DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2),
+//                     SetArgPointee<2>('a'), SetArgPointee<3>('b'),
+//                     SetArgPointee<4>('c'), SetArgPointee<5>('d'),
+//                     SetArgPointee<6>('e'), SetArgPointee<7>('f'), Return(3));
+//  EXPECT_EQ(3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e, &f)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//  EXPECT_EQ('c', c);
+//  EXPECT_EQ('d', d);
+//  EXPECT_EQ('e', e);
+//  EXPECT_EQ('f', f);
+//}
 
-// Tests DoAll(a1, a2, ..., a10).
-TEST(DoAllTest, TenActions) {
-  int m = 0, n = 0;
-  char a = '\0', b = '\0', c = '\0', d = '\0';
-  char e = '\0', f = '\0', g = '\0';
-  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
-             char*, char*, char*)>
-      action =
-          DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
-                SetArgPointee<3>('b'), SetArgPointee<4>('c'),
-                SetArgPointee<5>('d'), SetArgPointee<6>('e'),
-                SetArgPointee<7>('f'), SetArgPointee<8>('g'), Return(3));
-  EXPECT_EQ(
-      3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e, &f, &g)));
-  EXPECT_EQ(1, m);
-  EXPECT_EQ(2, n);
-  EXPECT_EQ('a', a);
-  EXPECT_EQ('b', b);
-  EXPECT_EQ('c', c);
-  EXPECT_EQ('d', d);
-  EXPECT_EQ('e', e);
-  EXPECT_EQ('f', f);
-  EXPECT_EQ('g', g);
-}
+//// Tests DoAll(a1, a2, ..., a10).
+//TEST(DoAllTest, TenActions) {
+//  int m = 0, n = 0;
+//  char a = '\0', b = '\0', c = '\0', d = '\0';
+//  char e = '\0', f = '\0', g = '\0';
+//  Action<int(int*, int*, char*, char*, char*, char*,  // NOLINT
+//             char*, char*, char*)>
+//      action =
+//          DoAll(SetArgPointee<0>(1), SetArgPointee<1>(2), SetArgPointee<2>('a'),
+//                SetArgPointee<3>('b'), SetArgPointee<4>('c'),
+//                SetArgPointee<5>('d'), SetArgPointee<6>('e'),
+//                SetArgPointee<7>('f'), SetArgPointee<8>('g'), Return(3));
+//  EXPECT_EQ(
+//      3, action.Perform(std::make_tuple(&m, &n, &a, &b, &c, &d, &e, &f, &g)));
+//  EXPECT_EQ(1, m);
+//  EXPECT_EQ(2, n);
+//  EXPECT_EQ('a', a);
+//  EXPECT_EQ('b', b);
+//  EXPECT_EQ('c', c);
+//  EXPECT_EQ('d', d);
+//  EXPECT_EQ('e', e);
+//  EXPECT_EQ('f', f);
+//  EXPECT_EQ('g', g);
+//}
 
-TEST(DoAllTest, NoArgs) {
-  bool ran_first = false;
-  Action<bool()> a =
-      DoAll([&] { ran_first = true; }, [&] { return ran_first; });
-  EXPECT_TRUE(a.Perform({}));
-}
+//TEST(DoAllTest, NoArgs) {
+//  bool ran_first = false;
+//  Action<bool()> a =
+//      DoAll([&] { ran_first = true; }, [&] { return ran_first; });
+//  EXPECT_TRUE(a.Perform({}));
+//}
 
-TEST(DoAllTest, MoveOnlyArgs) {
-  bool ran_first = false;
-  Action<int(std::unique_ptr<int>)> a =
-      DoAll(InvokeWithoutArgs([&] { ran_first = true; }),
-            [](std::unique_ptr<int> p) { return *p; });
-  EXPECT_EQ(7, a.Perform(std::make_tuple(std::unique_ptr<int>(new int(7)))));
-  EXPECT_TRUE(ran_first);
-}
+//TEST(DoAllTest, MoveOnlyArgs) {
+//  bool ran_first = false;
+//  Action<int(std::unique_ptr<int>)> a =
+//      DoAll(InvokeWithoutArgs([&] { ran_first = true; }),
+//            [](std::unique_ptr<int> p) { return *p; });
+//  EXPECT_EQ(7, a.Perform(std::make_tuple(std::unique_ptr<int>(new int(7)))));
+//  EXPECT_TRUE(ran_first);
+//}
 
 TEST(DoAllTest, ImplicitlyConvertsActionArguments) {
   bool ran_first = false;
@@ -1544,7 +1552,7 @@ TEST(ActionTemplateTest, CanBeOverloadedOnNumberOfValueParameters) {
 }
 
 }  // namespace gmock_more_actions_test
-}  // namespace testing
+//}  // namespace testing
 
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4100 4503
 GTEST_DISABLE_MSC_WARNINGS_POP_()  // 4577

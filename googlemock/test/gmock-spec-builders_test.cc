@@ -45,8 +45,82 @@
 #include "gtest/gtest.h"
 #include "gtest/internal/gtest-port.h"
 
-namespace testing {
+//namespace testing {
 namespace {
+
+
+using ::testing::_;
+using ::testing::Action;
+using ::testing::ActionInterface;
+using ::testing::Assign;
+using ::testing::ByMove;
+using ::testing::ByRef;
+using ::testing::DefaultValue;
+using ::testing::DoDefault;
+using ::testing::ElementsAre;
+using ::testing::Field;
+using ::testing::IgnoreResult;
+using ::testing::Invoke;
+using ::testing::InvokeWithoutArgs;
+using ::testing::MakePolymorphicAction;
+using ::testing::MockFunction;
+using ::testing::OnceAction;
+using ::testing::Pointee;
+using ::testing::PolymorphicAction;
+using ::testing::Return;
+using ::testing::ReturnNew;
+using ::testing::ReturnNull;
+using ::testing::ReturnRef;
+using ::testing::ReturnRefOfCopy;
+using ::testing::ReturnRoundRobin;
+using ::testing::SetArgPointee;
+using ::testing::SetArgumentPointee;
+using ::testing::SetErrnoAndReturn;
+using ::testing::Unused;
+using ::testing::WithArg;
+using ::testing::WithArgs;
+
+using testing::AnyNumber;
+using testing::AtLeast;
+using testing::AtMost;
+using testing::Between;
+using testing::Cardinality;
+using testing::CardinalityInterface;
+using testing::Exactly;
+using testing::IsSubstring;
+using testing::MakeCardinality;
+
+
+using testing::_;
+using testing::AnyNumber;
+using testing::Ge;
+using testing::InSequence;
+using testing::NaggyMock;
+using testing::Ref;
+using testing::Return;
+using testing::Sequence;
+using testing::Value;
+
+using ::testing::Expectation;
+using testing::ExpectationSet;
+
+using ::testing::Mock;
+using testing::Const;
+using testing::HasSubstr;
+using testing::IsNotSubstring;
+using testing::ContainsRegex;
+
+using testing::Action;
+using testing::DeleteArg;
+using testing::Invoke;
+using testing::ReturnArg;
+using testing::ReturnPointee;
+using testing::SaveArg;
+using testing::SaveArgPointee;
+using testing::SetArgReferee;
+using testing::Unused;
+using testing::WithArg;
+using testing::WithoutArgs;
 
 using ::testing::internal::FormatFileLocation;
 using ::testing::internal::kAllow;
@@ -1785,7 +1859,7 @@ TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
 
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningValue) {
   MockA* const a = new MockA;
-  EXPECT_CALL(*a, ReturnResult(_)).WillOnce(DoAll(Delete(a), Return(Result())));
+  EXPECT_CALL(*a, ReturnResult(_)).WillOnce(testing::DoAll(Delete(a), Return(Result())));
   a->ReturnResult(42);  // This will cause a to be deleted.
 }
 
@@ -2587,7 +2661,7 @@ TEST(ParameterlessExpectationsTest,
 }
 
 }  // namespace
-}  // namespace testing
+//}  // namespace testing
 
 int main(int argc, char** argv) {
   testing::InitGoogleMock(&argc, argv);
