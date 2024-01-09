@@ -133,7 +133,9 @@ using testing::AllOf;
 using testing::AnyOf;
 using testing::Assign;
 using testing::ContainerEq;
+#if (!defined(GTEST_BACKCOMP_ACTIONS_ADL) || !GTEST_BACKCOMP_ACTIONS_ADL)
 using testing::DoAll;
+#endif
 using testing::DoDefault;
 using testing::DoubleEq;
 using testing::ElementsAre;
@@ -168,6 +170,7 @@ using testing::ResultOf;
 using testing::Return;
 using testing::ReturnNull;
 using testing::ReturnRef;
+using testing::SaveArg;
 using testing::SetArgPointee;
 using testing::SetArrayArgument;
 using testing::StartsWith;
@@ -389,6 +392,28 @@ TEST(LinkTest, TestDoAll) {
       .WillOnce(DoAll(SetArgPointee<0>('y'), Return()));
   mock.VoidFromString(&ch);
 }
+
+// Tests the linkage of the DoAll action.
+TEST(LinkTest, TestDoAllWithSaveArgAndReturn) {
+  Mock mock;
+  double f;
+
+  EXPECT_CALL(mock, VoidFromDouble(_))
+      .WillOnce(DoAll(SaveArg<0>(&f), Return()));
+  mock.VoidFromDouble(2.0);
+}
+
+#if (defined(GTEST_BACKCOMP_ACTIONS_ADL) && GTEST_BACKCOMP_ACTIONS_ADL)
+// Tests the linkage of the DoAll action.
+TEST(LinkTest, TestDoAllAdl) {
+  Mock mock;
+  double f;
+
+  EXPECT_CALL(mock, VoidFromDouble(_))
+      .WillOnce(DoAll(SaveArg<0>(&f)));
+  mock.VoidFromDouble(2.0);
+}
+#endif  // defined(GTEST_BACKCOMP_ACTIONS_ADL) && GTEST_BACKCOMP_ACTIONS_ADL
 
 // Tests the linkage of the DoDefault action.
 TEST(LinkTest, TestDoDefault) {

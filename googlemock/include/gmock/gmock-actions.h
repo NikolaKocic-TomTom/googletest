@@ -148,6 +148,13 @@
 
 GTEST_DISABLE_MSC_WARNINGS_PUSH_(4100)
 
+namespace actions_namespace =
+#if (defined(GTEST_BACKCOMP_ACTIONS_ADL) && GTEST_BACKCOMP_ACTIONS_ADL)
+  ::testing;
+#else
+  ::testing::internal;
+#endif
+
 namespace testing {
 
 // To implement an action Foo, define:
@@ -1642,6 +1649,10 @@ class DoAllAction<InitialAction, OtherActions...>
   InitialAction initial_action_;
 };
 
+#if (defined(GTEST_BACKCOMP_ACTIONS_ADL) && GTEST_BACKCOMP_ACTIONS_ADL)
+}  // namespace internal
+#endif
+
 template <typename T, typename... Params>
 struct ReturnNewAction {
   T* operator()() const {
@@ -1742,7 +1753,9 @@ struct ThrowAction {
 };
 #endif  // GTEST_HAS_EXCEPTIONS
 
+#if (!defined(GTEST_BACKCOMP_ACTIONS_ADL) || !GTEST_BACKCOMP_ACTIONS_ADL)
 }  // namespace internal
+#endif
 
 // An Unused object can be implicitly constructed from ANY value.
 // This is handy when defining actions that ignore some or all of the
@@ -1999,35 +2012,35 @@ inline ::std::reference_wrapper<T> ByRef(T& l_value) {  // NOLINT
 // instance of type T, constructed on the heap with constructor arguments
 // a1, a2, ..., and a_k. The caller assumes ownership of the returned value.
 template <typename T, typename... Params>
-internal::ReturnNewAction<T, typename std::decay<Params>::type...> ReturnNew(
+actions_namespace::ReturnNewAction<T, typename std::decay<Params>::type...> ReturnNew(
     Params&&... params) {
   return {std::forward_as_tuple(std::forward<Params>(params)...)};
 }
 
 // Action ReturnArg<k>() returns the k-th argument of the mock function.
 template <size_t k>
-internal::ReturnArgAction<k> ReturnArg() {
+actions_namespace::ReturnArgAction<k> ReturnArg() {
   return {};
 }
 
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
 // mock function to *pointer.
 template <size_t k, typename Ptr>
-internal::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
+actions_namespace::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
   return {pointer};
 }
 
 // Action SaveArgPointee<k>(pointer) saves the value pointed to
 // by the k-th (0-based) argument of the mock function to *pointer.
 template <size_t k, typename Ptr>
-internal::SaveArgPointeeAction<k, Ptr> SaveArgPointee(Ptr pointer) {
+actions_namespace::SaveArgPointeeAction<k, Ptr> SaveArgPointee(Ptr pointer) {
   return {pointer};
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
 // referenced by the k-th (0-based) argument of the mock function.
 template <size_t k, typename T>
-internal::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
+actions_namespace::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
     T&& value) {
   return {std::forward<T>(value)};
 }
@@ -2038,7 +2051,7 @@ internal::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
 // iterator. The action does not take ownership of the elements in the
 // source range.
 template <size_t k, typename I1, typename I2>
-internal::SetArrayArgumentAction<k, I1, I2> SetArrayArgument(I1 first,
+actions_namespace::SetArrayArgumentAction<k, I1, I2> SetArrayArgument(I1 first,
                                                              I2 last) {
   return {first, last};
 }
@@ -2046,13 +2059,13 @@ internal::SetArrayArgumentAction<k, I1, I2> SetArrayArgument(I1 first,
 // Action DeleteArg<k>() deletes the k-th (0-based) argument of the mock
 // function.
 template <size_t k>
-internal::DeleteArgAction<k> DeleteArg() {
+actions_namespace::DeleteArgAction<k> DeleteArg() {
   return {};
 }
 
 // This action returns the value pointed to by 'pointer'.
 template <typename Ptr>
-internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
+actions_namespace::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
   return {pointer};
 }
 
@@ -2060,7 +2073,7 @@ internal::ReturnPointeeAction<Ptr> ReturnPointee(Ptr pointer) {
 // to throw the given exception.  Any copyable value can be thrown.
 #if GTEST_HAS_EXCEPTIONS
 template <typename T>
-internal::ThrowAction<typename std::decay<T>::type> Throw(T&& exception) {
+actions_namespace::ThrowAction<typename std::decay<T>::type> Throw(T&& exception) {
   return {std::forward<T>(exception)};
 }
 #endif  // GTEST_HAS_EXCEPTIONS
