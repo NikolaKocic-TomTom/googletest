@@ -71,7 +71,7 @@ using testing::Cardinality;
 using testing::CardinalityInterface;
 using testing::Const;
 using testing::ContainsRegex;
-using testing::DoAll;
+//using testing::DoAll;
 using testing::DoDefault;
 using testing::Eq;
 using testing::Expectation;
@@ -153,6 +153,7 @@ class MockA {
   MOCK_METHOD0(ReturnNonDefaultConstructible, NonDefaultConstructible());
   MOCK_METHOD2(Binary, bool(int x, int y));
   MOCK_METHOD2(ReturnInt, int(int x, int y));
+  MOCK_METHOD2(VoidFromTwoInts, void(int x, int y));
 
  private:
   GTEST_DISALLOW_COPY_AND_ASSIGN_(MockA);
@@ -1895,7 +1896,7 @@ TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningVoid) {
 TEST(DeletingMockEarlyTest, CanDeleteSelfInActionReturningValue) {
   MockA* const a = new MockA;
   EXPECT_CALL(*a, ReturnResult(_))
-      .WillOnce(DoAll(Delete(a), Return(Result())));
+      .WillOnce(testing::DoAll(Delete(a), Return(Result())));
   a->ReturnResult(42);  // This will cause a to be deleted.
 }
 
@@ -2692,6 +2693,14 @@ TEST(ParameterlessExpectationsTest, CanSetExpectationsWithoutMatchers) {
   ON_CALL(a, DoA).WillByDefault(SaveArg<0>(&do_a_arg0));
   int do_a_47_arg0 = 0;
   ON_CALL(a, DoA(47)).WillByDefault(SaveArg<0>(&do_a_47_arg0));
+
+  int saved_int_arg_0;
+  int saved_int_arg_1;
+  EXPECT_CALL(a, VoidFromTwoInts(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&saved_int_arg_0), SaveArg<0>(&saved_int_arg_1), Return()));
+
+  EXPECT_CALL(a, VoidFromTwoInts(_, _))
+      .WillOnce(DoAll(SaveArg<0>(&saved_int_arg_0), SaveArg<0>(&saved_int_arg_1)));
 
   a.DoA(17);
   EXPECT_THAT(do_a_arg0, 17);
