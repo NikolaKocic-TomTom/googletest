@@ -1084,6 +1084,8 @@ struct ReturnArgAction {
   }
 };
 
+}  // namespace internal
+
 template <size_t k, typename Ptr>
 struct SaveArgAction {
   Ptr pointer;
@@ -1117,6 +1119,8 @@ struct SetArgRefereeAction {
     std::get<k>(std::tie(args...)) = value;
   }
 };
+
+namespace internal {
 
 template <size_t k, typename I1, typename I2>
 struct SetArrayArgumentAction {
@@ -1409,21 +1413,21 @@ internal::ReturnArgAction<k> ReturnArg() {
 // Action SaveArg<k>(pointer) saves the k-th (0-based) argument of the
 // mock function to *pointer.
 template <size_t k, typename Ptr>
-internal::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
+testing::SaveArgAction<k, Ptr> SaveArg(Ptr pointer) {
   return {pointer};
 }
 
 // Action SaveArgPointee<k>(pointer) saves the value pointed to
 // by the k-th (0-based) argument of the mock function to *pointer.
 template <size_t k, typename Ptr>
-internal::SaveArgPointeeAction<k, Ptr> SaveArgPointee(Ptr pointer) {
+testing::SaveArgPointeeAction<k, Ptr> SaveArgPointee(Ptr pointer) {
   return {pointer};
 }
 
 // Action SetArgReferee<k>(value) assigns 'value' to the variable
 // referenced by the k-th (0-based) argument of the mock function.
 template <size_t k, typename T>
-internal::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
+testing::SetArgRefereeAction<k, typename std::decay<T>::type> SetArgReferee(
     T&& value) {
   return {std::forward<T>(value)};
 }
